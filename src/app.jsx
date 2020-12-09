@@ -1,9 +1,90 @@
-import React from "react";
+import React, { useState } from "react";
+import { useCallback } from "react";
 import "./app.css";
-import Habit from "./components/habit";
+import Habits from "./components/habits";
+import Navbar from "./components/navbar";
 
-function App() {
-  return <Habit />;
-}
+const App = (props) => {
+  console.log("app");
+  const [habits, setHabits] = useState([
+    {
+      id: 1,
+      name: "reading",
+      count: 0,
+    },
+    {
+      id: 2,
+      name: "working",
+      count: 0,
+    },
+    {
+      id: 3,
+      name: "eating",
+      count: 0,
+    },
+  ]);
+
+  const handleIncrement = useCallback((habit) => {
+    setHabits((habits) =>
+      habits.map((item) => {
+        if (item.id === habit.id) {
+          return { ...habit, count: habit.count + 1 };
+        }
+        return item;
+      })
+    );
+  }, []);
+
+  const handleDecrement = useCallback((habit) => {
+    setHabits((habits) =>
+      habits.map((item) => {
+        if (item.id === habit.id) {
+          const count = habit.count - 1;
+          return { ...habit, count: count < 0 ? 0 : count };
+        }
+        return item;
+      })
+    );
+  }, []);
+
+  const handleDelete = useCallback((habit) => {
+    setHabits((habits) => habits.filter((item) => item.id !== habit.id));
+  }, []);
+
+  const handleAdd = useCallback((name) => {
+    setHabits((habits) => [
+      ...habits,
+      {
+        id: Date.now(),
+        name,
+        count: 0,
+      },
+    ]);
+  }, []);
+
+  const handleReset = useCallback(() => {
+    setHabits((habits) =>
+      habits.map((habit) => {
+        if (habit.count !== 0) {
+          return { ...habit, count: 0 };
+        }
+        return habit;
+      })
+    );
+  }, []);
+  return (
+    <>
+      <Navbar totalCount={habits.filter((item) => item.count !== 0).length} />
+      <Habits
+        habits={habits}
+        onIncrement={handleIncrement}
+        onDecrement={handleDecrement}
+        onDelete={handleDelete}
+        onAdd={handleAdd}
+        onReset={handleReset}
+      />
+    </>
+  );
+};
 
 export default App;
